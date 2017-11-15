@@ -245,6 +245,7 @@ func (r *repo) CreateGuest(g *Guest) error {
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 	if !rows.Next() {
 		return fmt.Errorf("Unable to create new guest")
 	}
