@@ -62,6 +62,26 @@ type Ticket struct {
 	GuestID string
 }
 
+func (t Ticket) TicketImageURL() string {
+	switch t.Slot.Weekday() {
+	case time.Sunday:
+		return "/assets/img/bgimg-0.png"
+	case time.Monday:
+		return "/assets/img/bgimg-1.gif"
+	case time.Tuesday:
+		return "/assets/img/bgimg-2.jpg"
+	case time.Wednesday:
+		return "/assets/img/bgimg-3.jpg"
+	case time.Thursday:
+		return "/assets/img/bgimg-4.gif"
+	case time.Friday:
+		return "/assets/img/bgimg-5.gif"
+	case time.Saturday:
+		return "/assets/img/bgimg-6.gif"
+	}
+	return "/assets/img/bgimg-0.png"
+}
+
 type Slot struct {
 	Slot             time.Time
 	AvailableTickets int64

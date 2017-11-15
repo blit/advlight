@@ -23,7 +23,7 @@ func TicketShowHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		"",  // ErrorMsg
 		nil, // Ticket
-		nil, // Guest``
+		nil, // Guest
 	}
 
 	slot, err := strconv.ParseInt(ticketID, 10, 64)
