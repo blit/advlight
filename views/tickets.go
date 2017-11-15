@@ -50,7 +50,10 @@ func TicketShowHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if data.Ticket == nil {
 		data.ErrorMsg = "Sorry, this does not appear to be a valid ticket id, please check your link and try again"
+	} else if !guest.Verified {
+		tickets.Repo.VerifyGuest(guest)
 	}
+
 	Render(w, "ticket.html", data)
 	return
 
@@ -168,18 +171,14 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 			data.Guest, err = tickets.Repo.GetGuest(guest.ID)
 		}
 
-		if !guest.Verified {
-			em := tickets.ConfirmationEmail(*guest)
-			err = tickets.SendEmail(guest.Email, em)
-			if err != nil {
-				data.ErrorMsg = err.Error()
-				Render(w, "index.html", data)
-				return
-			}
-			data.SentEmailConfirm = true
-		} else {
-			data.SuccessMsg = "Ticket updated"
+		em := tickets.ConfirmationEmail(*guest, slotTime)
+		err = tickets.SendEmail(guest.Email, em)
+		if err != nil {
+			data.ErrorMsg = err.Error()
+			Render(w, "index.html", data)
+			return
 		}
+		data.SentEmailConfirm = true
 		Render(w, "index.html", data)
 		return
 	}

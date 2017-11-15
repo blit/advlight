@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/matcornic/hermes"
 	gomail "gopkg.in/gomail.v2"
@@ -36,7 +37,7 @@ func init() {
 	}
 }
 
-func ConfirmationEmail(g Guest) hermes.Email {
+func ConfirmationEmail(g Guest, slot time.Time) hermes.Email {
 	return hermes.Email{
 		Body: hermes.Body{
 			Name: g.Email,
@@ -49,7 +50,7 @@ func ConfirmationEmail(g Guest) hermes.Email {
 					Button: hermes.Button{
 						Color: "#0F8A5F",
 						Text:  "Confirm",
-						Link:  HostName + "/" + g.GetToken(),
+						Link:  g.GetTicketURL(slot),
 					},
 				},
 				{

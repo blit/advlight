@@ -1,21 +1,105 @@
-{{ define "content" }}
-<div style="max-width:400px; margin:20px auto; height:100px;">    
-    {{ with .Guest }}
-      <a href="/{{.ID}}" style="margin-bottom:15px;" class="btn btn-outline-info btn-sm"><< My Tickets</a>
-    {{ end }}
-    {{ with .ErrorMsg}}<div class="alert alert-danger" role="alert">{{.}}</div>{{end}}
-    <div style="text-align: center;">
-      {{ with .Ticket }}
-        <h5 style="color:#555">note: this is not your actual ticket, please check back soon.  Your actual ticket will have a Christmas picture background</h5>
-        <h3 style="color:#0F8A5F;">You Have a Confirmed Ticket for The Bayside Adventure Christmas Lights Drive Thru</h3>
-        <h3>At</h3>
-        <h3>{{.Slot.Format "Jan 02, 3:04pm"}}</h3>
-      {{ end }}
-    </div>
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Favicons -->
+	<link rel="icon" sizes="16x16 32x32" href="https://s3-us-west-1.amazonaws.com/baysideonline4.0/assets/favicon.png">
+	<!--[if IE]><link rel="shortcut icon" href="https://s3-us-west-1.amazonaws.com/baysideonline4.0/assets/favicon.ico"><![endif]-->
+	<!--[if lt IE 9]><link href='http://s3-us-west-1.amazonaws.com/baysideonline4.0/wp-content/themes/bones/bootstrap/css/ie8-1.css' type='text/css'/><![endif]-->
+	<!--[if lt IE 9]><link href='http://s3-us-west-1.amazonaws.com/baysideonline4.0/wp-content/themes/bones/bootstrap/css/ie8-2.css' type='text/css'/><![endif]-->		 
+	<link rel="apple-touch-icon-precomposed" href="https://s3-us-west-1.amazonaws.com/baysideonline4.0/assets/152x152.png">
+	<meta name="msapplication-TileColor" content="#2aace3">
+	<meta name="msapplication-TileImage" content="https://s3-us-west-1.amazonaws.com/baysideonline4.0/assets/144x144.png"> 
+	<meta name="viewport" content="width=device-width, minimal-ui">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  
+<style>
+body, html {
+  height: 100%;
+  margin: 0;
+  font: 400 15px/1.8 "Lato", sans-serif;
+  color: #777;
+}
 
-    <div style="position: fixed; bottom:0; left:0; width:100%;">
-        <a style="width:100%" href="http://granitebay.baysideonline.com/christmas-drive-thru-giving/" class="btn btn-primary">Donate</a>
+.bgimg-0,.bgimg-1, .bgimg-2,.bgimg-3, .bgimg-4,.bgimg-5, .bgimg-6,
+.bgimg-Sunday,.bgimg-Monday, .bgimg-Tuesday,.bgimg-Wednesday, .bgimg-Thursday,.bgimg-Friday, .bgimg-Saturday {
+  position: relative;
+  opacity: 0.65;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100%;
+}
+.bgimg-0, .bgimg-Sunday {
+  background-image: url(/assets/img/bgimg-0.png);
+}
+.bgimg-1, .bgimg-Monday {
+  background-image: url(/assets/img/bgimg-1.gif);
+}
+.bgimg-2, .bgimg-Tuesday{
+  background-image: url(/assets/img/bgimg-2.jpg);
+}
+.bgimg-3, .bgimg-Wednesday {
+  background-image: url(/assets/img/bgimg-3.jpg);
+}
+.bgimg-4, .bgimg-Thursday {
+  background-image: url(/assets/img/bgimg-4.gif);
+}
+.bgimg-5, .bgimg-Friday {
+  background-image: url(/assets/img/bgimg-5.gif);
+}
+.bgimg-6, .bgimg-Saturday {
+  background-image: url(/assets/img/bgimg-6.gif);
+}
+
+.ticket-container-txt {
+    background: rgb(255, 255, 255) transparent;
+    background: rgba(255, 255, 255, 0.8);    
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#CCFFFFFF, endColorstr=#CCFFFFFF);
+    /* IE8 */    
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#CCFFFFFF, endColorstr=#CCFFFFFF)";
+    border-radius: 5px;
+    padding:10px 10px;
+}
+.bgimg-.ticket-container-txt {
+  background: none transparent;
+}
+
+</style>
+</head>
+<body>
+
+  {{ with .ErrorMsg}}
+    <div style="color:red;" role="alert">{{.}}</div>
+  {{end}}
+
+
+  {{ with .Ticket }}
+  <div class="bgimg-{{.Slot.Weekday}}" style="display: flex;flex-direction: column;justify-content: center;">
+  <div style="color:#000; text-align:center;">
+    <div style="max-width:550px; margin:0 auto;">
+      <div class="ticket-container-txt">        
+        <div style="margin-bottom:0px; font-size:3em; line-height:1em; font-weight:bold;">
+          Bayside <span style="color:#D11111">Christmas</span> Adventure
+          <span style="color:#D11111">Lights</span> Drive Thru
+        </div>
+        <div style="padding-top:10%;font-size:3.1em;line-height:1em;font-weight:bold;color:#4c991a;">
+           {{.Slot.Format "Jan 02 3:04pm"}}
+        </div>
+        <div style="color:#333; text-align:center;">
+          Present this ticket on your mobile device (printed tickets work too) for the date/time shown at
+          <strong>Bayside Adventure, 6401 Stanford Ranch Rd, Roseville, CA, 95678</strong>
+        </div>
+        {{ with $.Guest }}
+        <a href="/{{.ID}}" style="margin-bottom:15px;" class="btn btn-outline-info btn-sm">My Tickets</a>
+        {{ end }}          
+      </div>
     </div>
+  </div>
+  {{ end }}
 </div>
-
-{{ end }}
+</body>
+</html>

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -49,6 +50,10 @@ func (g *Guest) Validate() error {
 
 func (g Guest) GetToken() string {
 	return strings.Replace(g.ID, "-", "", -1)
+}
+
+func (g Guest) GetTicketURL(slot time.Time) string {
+	return HostName + "/" + g.GetToken() + "/ticket/" + strconv.Itoa(int(slot.Unix()))
 }
 
 type Ticket struct {

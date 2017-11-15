@@ -26,6 +26,7 @@ func LoadTemplates() error {
 	if strings.EqualFold(os.Getenv("ADVLIGHT_ENV"), "production") {
 		return loadTemplatesProd()
 	} else {
+		reloadTemplates = true
 		return loadTemplatesDev()
 	}
 }
@@ -71,13 +72,20 @@ func loadTemplatesDev() error {
 	}
 	for _, name := range []string{
 		"index.html",
-		"ticket.html",
+		//"ticket.html",
 	} {
 		err := fn(name)
 		if err != nil {
 			return err
 		}
 	}
+	// no template for ticket
+	t, err := template.ParseFiles(tplPath + "/ticket.html")
+	if err != nil {
+		return err
+	}
+	templates["ticket.html"] = t
+
 	return nil
 }
 
