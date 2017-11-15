@@ -21,7 +21,7 @@ func init() {
 		Theme: new(hermes.Flat),
 		Product: hermes.Product{
 			// Appears in header & footer of e-mails
-			Name: "Bayside Christmas Adventure -- Christmas Lights Drive-Thru",
+			Name: "Bayside Christmas Lights Drive-Thru",
 			Link: "http://christmas.baysideonline.com/lights",
 			// Optional product logo
 			Logo:      "http://v.fastcdn.co/t/c179d187/b85e76d2/1510270294-24260441-767x176x960x540x68x176-Christmas-Website---.png",
@@ -42,14 +42,14 @@ func ConfirmationEmail(g Guest, slot time.Time) hermes.Email {
 		Body: hermes.Body{
 			Name: g.Email,
 			Intros: []string{
-				"You have received this email to confirm your ticket for a Bayside Christmas Adventure -- Christmas Lights Drive-Thru",
+				"You have received this email to confirm your ticket for the Bayside Christmas Lights Drive-Thru",
 			},
 			Actions: []hermes.Action{
 				{
 					Instructions: "Click the button below to confirm/view your ticket:",
 					Button: hermes.Button{
 						Color: "#0F8A5F",
-						Text:  "Confirm",
+						Text:  "Confirm | View Ticket",
 						Link:  g.GetTicketURL(slot),
 					},
 				},
@@ -84,7 +84,7 @@ func SendEmail(address string, email hermes.Email) error {
 	m := gomail.NewMessage()
 	m.SetHeader("From", `"Bayside Christmas Lights" <support@blit.com>`)
 	m.SetHeader("To", address)
-	m.SetHeader("Subject", "Confirm your Bayside Christmas Drive Through Tickets")
+	m.SetHeader("Subject", "Confirm and View your Bayside Christmas Drive-Thru Tickets")
 	m.SetBody("text/plain", textpart)
 	m.AddAlternative("text/html", htmlpart)
 
