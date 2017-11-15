@@ -1,0 +1,21 @@
+{{ define "content" }}
+<div style="max-width:400px; margin:20px auto; height:100px;">    
+    {{ with .Guest }}
+      <a href="/{{.ID}}" style="margin-bottom:15px;" class="btn btn-outline-info btn-sm"><< My Tickets</a>
+    {{ end }}
+    {{ with .ErrorMsg}}<div class="alert alert-danger" role="alert">{{.}}</div>{{end}}
+    <div style="text-align: center;">
+      {{ with .Ticket }}
+        <h5 style="color:#555">note: this is not your actual ticket, please check back soon.  Your actual ticket will have a Christmas picture background</h5>
+        <h3 style="color:#0F8A5F;">You Have a Confirmed Ticket for The Bayside Adventure Christmas Lights Drive Thru</h3>
+        <h3>At</h3>
+        <h3>{{.Slot.Format "Jan 02, 3:04pm"}}</h3>
+      {{ end }}
+    </div>
+
+    <div style="position: fixed; bottom:0; left:0; width:100%;">
+        <a style="width:100%" href="http://granitebay.baysideonline.com/christmas-drive-thru-giving/" class="btn btn-primary">Donate</a>
+    </div>
+</div>
+
+{{ end }}

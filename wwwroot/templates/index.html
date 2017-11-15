@@ -1,0 +1,95 @@
+{{ define "content" }}
+<div style="max-width:400px; margin:20px auto; height:100px;">
+    <div style="text-align: center;">
+        <h3 style="color:#0F8A5F;">Christmas Lights Drive Thru</h3>
+        {{ with .ErrorMsg}}<div class="alert alert-danger" role="alert">{{.}}</div>{{end}}
+        {{ with .SuccessMsg}}<div class="alert alert-success" role="alert">{{.}}</div>{{end}}
+        {{ if .SentEmailConfirm }}
+            <div class="alert alert-success" role="alert">
+                An email has been sent to <strong>{{$.Email}}</strong> with a link to confirm your ticket.
+            </div>
+        {{ end }}
+
+        {{ with .Guest}}
+          {{ if .Tickets }}
+            <table class="table">
+                <thead class="thead-light">
+                    <tr>
+                    <th scope="col" colspan="2">Your Tickets</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range $index, $s := .Tickets }}
+                    <tr>
+                        <td>{{$s.Slot.Format "Jan 02, 3:04pm" }}</td>
+                        <td style="text-align: right">
+                            <a href="/{{.GuestID}}/ticket/{{$s.Slot.Unix}}" class="btn btn-primary btn-sm">view</a>
+                            <a href="#cancel" onclick="cancelTicket({{$s.Slot.Unix}});return(false);" class="btn btn-outline-danger btn-sm">cancel</a>
+                        </td>
+                    </tr>
+                    {{ end }}    
+                </tbody>
+            </table>
+          {{ else }}
+            <h4>Select a ticket time below and click <b>Update/Get Ticket</b> to reserve.</h4>
+          {{ end }}
+        {{ end }}
+    
+
+        {{ if .Guest }}
+        {{ else }}
+        <h4>Enter your email address and select a time to reserve a ticket</h4>
+        {{ end }}
+        <form style="margin-top:15px" method="POST" action="/{{with .Guest}}{{.GetToken}}{{end}}" id="ticketForm">
+            <div class="form-group">
+                {{ if .Guest }}
+                <input type="hidden" name="email" value="{{$.Email}}">
+                <input type="hidden" name="cancelslot" value="">
+                {{ else }}
+                <input type="email" class="form-control form-control-lg" name="email" placeholder="your@email.com" value="{{$.Email}}">
+                {{ end }}
+                
+                <select name="slot" class="form-control form-control-lg">
+                {{ range $index, $s := .Slots }}
+                <option value="{{$s.Slot.Unix}}" data-slot-name="{{$s.Slot.Format "Jan 02, 3:04pm" }}" {{if eq $s.Slot.Unix $.SelectedSlot}}selected{{end}}>
+                    {{$s.Slot.Format "Jan 02, 3:04pm" }} ({{$s.AvailableTickets}} avail)
+                </option>
+                {{ end }}    
+                </select>
+            </div>
+            {{ if .Guest }}
+                <button type="submit" class="btn btn-danger btn-lg" style="width:100%">Update/Get Ticket</button>
+                <small id="passwordHelpBlock" class="form-text text-muted">
+                    You may only have 1 reservation per day.
+                </small>                        
+            {{ else }}
+                <button type="submit" class="btn btn-danger btn-lg" style="width:100%">Reserve <strong id="slotName"></strong></button>
+                <small id="passwordHelpBlock" class="form-text text-muted">
+                Clicking reserve will send an email to confirm your reservation.  You must click the confirmation email 
+                sent to your email to confirm your ticket, unconfirmed reservations may expire depending on demand.
+                </small>                        
+            {{ end }}            
+        </form>
+        
+        
+    </div>
+
+    <div style="position: fixed; bottom:0; left:0; width:100%;">
+        <a style="width:100%" href="http://granitebay.baysideonline.com/christmas-drive-thru-giving/" class="btn btn-primary">Donate</a>
+    </div>
+</div>
+
+<script>
+    function cancelTicket(slot) {
+        //console.log(slot);
+        var d = new Date(slot*1000);
+        if (!window.confirm("are you sure you want to cancel the ticket for "+ d.toLocaleString()+" ?")) {
+            return;
+        }
+        var frm = document.getElementById('ticketForm');
+        frm.cancelslot.value = slot;
+        frm.submit();
+    }
+</script>
+
+{{ end }}
