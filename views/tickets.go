@@ -138,6 +138,15 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 		RenderError(w, err)
 		return
 	}
+	if len(slots) < 1 && data.EventCode != "" {
+		data.ErrorMsg = fmt.Sprintf("%s is an invalid event code or is no longer valid", data.EventCode)
+		data.EventCode = ""
+		slots, err = tickets.Repo.GetSlots(data.EventCode)
+		if err != nil {
+			RenderError(w, err)
+			return
+		}
+	}
 	data.Slots = slots
 
 	// if we are just setting the event, we can exit now

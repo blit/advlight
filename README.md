@@ -17,6 +17,10 @@ GOOS=linux go build advlight.go
 ADVLIGHT_DATABASE_URL=[db_url]
 ADVLIGHT_ENV=production
 ADVLIGHT_SMTP=[username,password,host,port]
+
+# current deploy procedure
+scp advlight bcatickets.blit.com:advlight_update
+ssh -e ./advlight_deploy
 ```
 
 ## LICENSE
