@@ -42,6 +42,7 @@
         {{ end }}
         <form style="margin-top:15px" method="POST" action="/{{with .Guest}}{{.GetToken}}{{end}}" id="ticketForm">
             <div class="form-group">
+                <input type="hidden" name="eventcode" value="{{$.EventCode}}">
                 {{ if .Guest }}
                 <input type="hidden" name="email" value="{{$.Email}}">
                 <input type="hidden" name="cancelslot" value="">
@@ -56,6 +57,27 @@
                 </option>
                 {{ end }}    
                 </select>
+            </div>
+            <div style="margin-top:-5px;">
+                {{ if not .EventCode }}
+                <div id="eventcode_q" style="margin-bottom:10px;">
+                    <a href="#" onclick="toggleEventCode();return(false);">have an event code?</a>
+                </div>
+                {{ end }}
+                <div id="eventcode_a" style="margin-bottom:10px; {{ if not .EventCode }}display:none;{{end}}">
+                    <div class="input-group">
+                        <span class="input-group-addon" id="sizing-addon1">Event Code:</span>
+                        <input name="seteventcode_new" type="text" class="form-control" placeholder="{{ .EventCode }}" aria-label="enter code">
+                        <span class="input-group-btn">
+                            <button name="seteventcode" value="clear" class="btn btn-secondary" type="submit">clear</button>
+                        </span>
+                        <span class="input-group-btn">
+                            <button name="seteventcode" value="set" class="btn btn-success" type="submit">Set</button>
+                        </span>                            
+                    </div>                    
+                </div>
+
+                
             </div>
             {{ if .Guest }}
                 <button type="submit" class="btn btn-danger btn-lg" style="width:100%">Update/Get Ticket</button>
@@ -91,6 +113,10 @@
         var frm = document.getElementById('ticketForm');
         frm.cancelslot.value = slot;
         frm.submit();
+    }
+    function toggleEventCode() {
+        var el = document.getElementById("eventcode_a");
+        el.style.display = el.style.display === "none" ? "block" : "none";
     }
 </script>
 

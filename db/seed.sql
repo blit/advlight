@@ -39,5 +39,10 @@ select day from generate_series(
   select num from generate_series(1,150) num
 ) insert into tickets(slot, num) (select days.day, ticket_numbers.num from days cross join ticket_numbers);
 
+alter table tickets add column event_code citext;
+create index tickets_event_code_key on tickets(event_code);
+update tickets set event_code = 'staff' where slot::date='2017-11-26';
+update tickets set event_code = 'mcc' where slot='2017-12-03 18:30:00' and num in(select subq.num from tickets subq where subq.slot='2017-12-03 18:30:00' and subq.guest_id is null order by num limit 100);
+
 
 

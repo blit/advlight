@@ -61,11 +61,6 @@ func TicketShowHandler(w http.ResponseWriter, r *http.Request) {
 
 func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 	guestID := chi.URLParam(r, "guestID")
-	slots, err := tickets.Repo.GetSlots()
-	if err != nil {
-		RenderError(w, err)
-		return
-	}
 	data := struct {
 		Slots            []tickets.Slot
 		SelectedSlot     int64
@@ -74,16 +69,18 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 		SuccessMsg       string
 		SentEmailConfirm bool
 		Email            string
+		EventCode        string
 		Guest            *tickets.Guest
 	}{
-		slots, // Sots
+		nil,   // Slots
 		0,     // SelectSlot
 		0,     // CancelSlot
 		"",    // ErrorMsg
 		"",    // SuccessMsg
 		false, // SentEmailConfirm
 		"",    // Email
-		nil,   // Guest
+		r.URL.Query().Get("event"), // EventCode
+		nil, // Guest
 	}
 	// populate view data
 	if guestID != "" {
@@ -120,6 +117,33 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 			Render(w, "index.html", data)
 			return
 		}
+	}
+	// event codes affect the slots so need to be processed before calling GetSlots
+	// get the eventcode & slots
+	if data.EventCode == "" {
+		data.EventCode = r.FormValue("eventcode")
+	}
+	// see if the event code is being set to a new one
+	if r.FormValue("seteventcode_new") != "" {
+		data.EventCode = r.FormValue("seteventcode_new")
+	}
+	// see if the event code is being cleared
+	if r.FormValue("seteventcode") == "clear" {
+		data.EventCode = ""
+	}
+
+	data.EventCode = strings.TrimSpace(strings.ToLower(data.EventCode))
+	slots, err := tickets.Repo.GetSlots(data.EventCode)
+	if err != nil {
+		RenderError(w, err)
+		return
+	}
+	data.Slots = slots
+
+	// if we are just setting the event, we can exit now
+	if r.FormValue("seteventcode") != "" {
+		Render(w, "index.html", data)
+		return
 	}
 
 	// cancel a ticket/slot -- guest musgt be set
@@ -160,7 +184,7 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 			Render(w, "index.html", data)
 			return
 		}
-		err = tickets.Repo.AssignTicket(guest, slotTime)
+		err = tickets.Repo.AssignTicket(guest, slotTime, data.EventCode)
 		if err != nil {
 			data.ErrorMsg = err.Error()
 			Render(w, "index.html", data)
