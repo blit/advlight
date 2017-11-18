@@ -87,18 +87,20 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 		guest, err := tickets.Repo.GetGuest(guestID)
 		if err != nil {
 			data.ErrorMsg = err.Error()
-			Render(w, "index.html", data)
-			return
-		}
-		if !guest.Verified {
-			tickets.Repo.VerifyGuest(guest)
-		}
-		data.Email = guest.Email
-		data.Guest = guest
-		if len(guest.Tickets) > 0 {
-			data.SelectedSlot = guest.Tickets[0].Slot.Unix()
+		} else {
+			// set guest info
+			if !guest.Verified {
+				tickets.Repo.VerifyGuest(guest)
+			}
+			data.Email = guest.Email
+			data.Guest = guest
+			if len(guest.Tickets) > 0 {
+				data.SelectedSlot = guest.Tickets[0].Slot.Unix()
+			}
 		}
 	}
+
+	log.Printf("TicketIndexHandler %+v\n", data)
 
 	if r.Method == "POST" {
 		var err error
