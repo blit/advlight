@@ -46,7 +46,7 @@
       {{ range . }}
         <tr>
           <td>{{ .EventCode }} </td>
-          <td>{{ .Slot }} </td>
+          <td>{{ .Slot.Format "Jan 02, 3:04pm" }} </td>
           <td>{{ .NumberTickets }} </td>
           <td>{{ .AvailableTickets }} </td>
           
@@ -57,8 +57,8 @@
     </table>
 
     <script>
-      var loginForm = document.getElementById('loginForm');
-      setInterval(function(){ loginForm.submit(); }, 10000);
+      //var loginForm = document.getElementById('loginForm');
+      //setInterval(function(){ loginForm.submit(); }, 10000);
     </script>
   {{ end }}
 
