@@ -100,9 +100,8 @@
 
 <script>
     function cancelTicket(slot) {
-        //console.log(slot);
         var d = new Date(slot*1000);
-        if (!window.confirm("are you sure you want to cancel the ticket for "+ d.toLocaleString()+" ?")) {
+        if (!window.confirm("are you sure you want to cancel the ticket for "+ d.toLocaleDateString()+" ?")) {
             return;
         }
         var frm = document.getElementById('ticketForm');
