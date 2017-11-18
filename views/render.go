@@ -50,6 +50,7 @@ func loadTemplatesProd() error {
 	for _, name := range []string{
 		"index.html",
 		"ticket.html",
+		"admin.html",
 	} {
 		err := fn(name)
 		if err != nil {
@@ -72,7 +73,8 @@ func loadTemplatesDev() error {
 	}
 	for _, name := range []string{
 		"index.html",
-		//"ticket.html",
+		"ticket.html",
+		"admin.html",
 	} {
 		err := fn(name)
 		if err != nil {

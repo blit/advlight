@@ -88,6 +88,13 @@ type Slot struct {
 	AvailableTickets int64
 }
 
+type SlotStat struct {
+	Slot             time.Time
+	NumberTickets    int64
+	AvailableTickets int64
+	EventCode        string
+}
+
 type repo struct {
 	sync  sync.Mutex
 	db    *sql.DB
@@ -277,6 +284,7 @@ func (r *repo) AssignTicket(g *Guest, slot time.Time, eventCode string) error {
 }
 
 func (r *repo) CreateGuest(g *Guest) error {
+	log.Printf("CreateGuest %+v\n", g)
 	g.Email = strings.TrimSpace(strings.ToLower(g.Email))
 	var (
 		rows *sql.Rows
@@ -307,4 +315,21 @@ func (r *repo) CreateGuest(g *Guest) error {
 	}
 	rows.Scan(&(g.ID))
 	return nil
+}
+
+// GetSlotsStats gets all slots, not cached because it is behind an admin screen
+func (r *repo) GetSlotsStats() ([]SlotStat, error) {
+	log.Println("GetSlotsStats")
+	rows, err := r.db.Query(`select coalesce(event_code,''),slot,count(*), count(*) filter(where guest_id is null) from tickets group by event_code,slot order by event_code,slot;`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	slots := make([]SlotStat, 0)
+	for rows.Next() {
+		slot := &SlotStat{}
+		rows.Scan(&(slot.EventCode), &(slot.Slot), &(slot.NumberTickets), &(slot.AvailableTickets))
+		slots = append(slots, *slot)
+	}
+	return slots, nil
 }

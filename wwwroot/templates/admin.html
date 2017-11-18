@@ -1,0 +1,65 @@
+{{ define "content" }}
+  {{ with .ErrorMsg}}<div class="alert alert-danger" role="alert">{{.}}</div>{{end}}
+
+  <div style="width:300px; margin:20px auto; {{with .Stats}}display:none;{{end}}"> 
+    <form id="loginForm" method="POST">
+      <div class="form-group">
+        {{ with .Stats }}
+          <input name="password" type="hidden" value="{{$.Password}}">
+        {{ else }}  
+          <input name="password" type="password" class="form-control" id="password" placeholder="Password">
+        {{ end }}
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form> 
+  </div>
+
+  {{ with .Stats }}
+    <div class="container" style="text-align:center">
+        <div class="row">
+          <div class="col-sm">
+            <div>total</div>
+            <h1>{{$.TotalTickets}}</h1>
+          </div>
+          <div class="col-sm">
+              <div>booked</div>
+              <h1>{{$.TotalBooked}}</h1>
+            </div>
+          <div class="col-sm">
+              <div>available</div>
+              <h1>{{$.TotalAvailable}}</h1>
+            </div>
+        </div>
+    </div>  
+
+
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Time</th>
+          <th>Tickets</th>
+          <th>Available</th>
+        </tr>
+      </thead>
+      <tbody>
+      {{ range . }}
+        <tr>
+          <td>{{ .EventCode }} </td>
+          <td>{{ .Slot }} </td>
+          <td>{{ .NumberTickets }} </td>
+          <td>{{ .AvailableTickets }} </td>
+          
+        </tr>         
+      {{ end }}
+    
+      </tbody>
+    </table>
+
+    <script>
+      var loginForm = document.getElementById('loginForm');
+      setInterval(function(){ loginForm.submit(); }, 10000);
+    </script>
+  {{ end }}
+
+{{ end }}

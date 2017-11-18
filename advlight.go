@@ -22,6 +22,10 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Get("/", views.TicketIndexHandler)
 	r.Post("/", views.TicketIndexHandler)
+
+	r.Get("/admin", views.TicketAdminHandler)
+	r.Post("/admin", views.TicketAdminHandler)
+
 	r.Get("/{guestID}", views.TicketIndexHandler)
 	r.Post("/{guestID}", views.TicketIndexHandler)
 	r.Get("/{guestID}/ticket/{ticketID}", views.TicketShowHandler)
