@@ -268,12 +268,15 @@ func (r *repo) AssignTicket(g *Guest, slot time.Time, eventCode string) error {
 		slots, ok := r.cache.slots[eventCode]
 		if ok {
 			for idx, cslot := range slots {
-
 				if cslot.Slot.Equal(slot) {
 					fmt.Printf("MATCH %v == %v\n", cslot, slot)
 					r.sync.Lock()
 					match := &(slots[idx])
 					match.AvailableTickets = match.AvailableTickets - 1
+					if match.AvailableTickets < 1 {
+						// slot needs to be removed, so we'll just blow out the cache
+						r.cache.slots = nil
+					}
 					r.sync.Unlock()
 					break
 				}
@@ -320,7 +323,7 @@ func (r *repo) CreateGuest(g *Guest) error {
 // GetSlotsStats gets all slots, not cached because it is behind an admin screen
 func (r *repo) GetSlotsStats() ([]SlotStat, error) {
 	log.Println("GetSlotsStats")
-	rows, err := r.db.Query(`select coalesce(event_code,''),slot,count(*), count(*) filter(where guest_id is null) from tickets group by event_code,slot order by event_code,slot;`)
+	rows, err := r.db.Query(`select coalesce(event_code,''),slot,count(*), count(*) filter(where guest_id is null) from tickets group by event_code,slot order by slot,event_code NULLS LAST;`)
 	if err != nil {
 		return nil, err
 	}
