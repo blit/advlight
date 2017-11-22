@@ -44,7 +44,14 @@
       </thead>
       <tbody>
       {{ range . }}
-        <tr>
+        <tr
+          {{ if lt .AvailableTickets 1}}
+            class="table-danger"
+          {{ end }}
+          {{ if lt .AvailableTickets 25}}
+            class="table-warning"
+          {{ end }}
+        >
           <td>{{ .EventCode }} </td>
           <td>{{ .Slot.Format "Jan 02, 3:04pm" }} </td>
           <td>{{ .NumberTickets }} </td>
