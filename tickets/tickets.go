@@ -146,6 +146,31 @@ func (r *repo) GetSlots(eventCode string) ([]Slot, error) {
 	return slots, nil
 }
 
+func (r *repo) CreateSlots(eventCode string, ts, count int) error {
+	log.Println(`CreateSlots`, eventCode, ts, count)
+	if count > 100 { // safety
+		return fmt.Errorf("%d is too many", count)
+	}
+	eventCode = strings.TrimSpace(strings.ToLower(eventCode))
+	_, err := r.db.Exec(`
+		with slot as (
+		  select TIMESTAMP WITH TIME ZONE 'epoch' + $1 * INTERVAL '1 second' as slot
+		), max_ticket_num as (
+			select max(num)::integer as num from slot,tickets t where t.slot=slot.slot
+		), ticket_numbers as (
+			select num.num from max_ticket_num,generate_series(max_ticket_num.num+1, max_ticket_num.num+$2) num
+		) insert into tickets(event_code,slot, num) (select NULLIF($3,''), slot.slot, ticket_numbers.num from slot cross join ticket_numbers);
+	`, ts, count, eventCode)
+	if err != nil {
+		return err
+	}
+	// changed the db, so lets blow out the cache
+	r.sync.Lock()
+	r.cache.slots = nil
+	r.sync.Unlock()
+	return nil
+}
+
 func (r *repo) GetGuest(guestID string) (*Guest, error) {
 	log.Println(`GetGuest`, guestID)
 	rows, err := r.db.Query(`select g.id,g.email,g.verified,t.slot,t.num,t.event_code from guests g left join tickets t on (g.id=t.guest_id) where g.id=$1 order by t.slot;`, guestID)
@@ -245,7 +270,7 @@ func (r *repo) VerifyGuest(g *Guest) error {
 
 func (r *repo) CancelTicket(g *Guest, slot time.Time) error {
 	log.Printf("CancelTicket %s %s, %v", g.ID, g.Email, slot)
-	// cancel any tickets the guest would already have on this day
+	// cancel any tickets the guest would already have on this
 	_, err := r.db.Exec("update tickets set guest_id = null where guest_id=$1 and slot::date = $2::date", g.ID, slot)
 	if err != nil {
 		return err
@@ -387,4 +412,10 @@ func (r *repo) GetSlotsStats() ([]SlotStat, error) {
 		slots = append(slots, *slot)
 	}
 	return slots, nil
+}
+
+func (r *repo) ClearCache() {
+	r.sync.Lock()
+	r.cache.slots = nil
+	r.sync.Unlock()
 }

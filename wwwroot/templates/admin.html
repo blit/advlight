@@ -3,6 +3,7 @@
 
   <div style="width:300px; margin:20px auto; {{with .Stats}}display:none;{{end}}"> 
     <form id="loginForm" method="POST">
+      <input id="addTicketsInput" type="hidden" name="addTickets" value="">
       <div class="form-group">
         {{ with .Stats }}
           <input name="password" type="hidden" value="{{$.Password}}">
@@ -54,8 +55,14 @@
         >
           <td>{{ .EventCode }} </td>
           <td>{{ .Slot.Format "Jan 02, 3:04pm" }} </td>
-          <td>{{ .NumberTickets }} </td>
-          <td>{{ .AvailableTickets }} </td>
+          <td>
+            <div>
+                <button type="button" data-slot="{{.Slot.Unix}}" onclick="showAddTickets(this);return(false);" class="btn btn-sm btn-outline-secondary">{{ .NumberTickets }}</button>
+            </div>            
+          </td>
+          <td>
+            {{ .AvailableTickets }}        
+          </td>
           
         </tr>         
       {{ end }}
@@ -64,8 +71,16 @@
     </table>
 
     <script>
-      //var loginForm = document.getElementById('loginForm');
-      //setInterval(function(){ loginForm.submit(); }, 10000);
+      function showAddTickets(el) {
+        var parent = el.parentElement;
+        var slot = el.getAttribute('data-slot');
+        parent.innerHTML = '<select onchange="addTickets('+slot+',this.value);" class="form-control form-control-sm" style="width:auto;"><option value="">Add Tickets</option><option value="10">+10</option><option value="20">+20</option><option value="30">+30</option><option value="40">+40</option><option value="50">+50</option></select>'
+      }
+      function addTickets(slot, count) {
+        var frmEl = document.getElementById("addTicketsInput");
+        frmEl.value = slot + "+" + count;
+        frmEl.form.submit();
+      }
     </script>
   {{ end }}
 

@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/blit/advlight/tickets"
 )
@@ -17,17 +19,36 @@ func TicketAdminHandler(w http.ResponseWriter, r *http.Request) {
 		TotalBooked    int64
 		TotalAvailable int64
 		Password       string
+		AddTickets     string
 	}{
 		"",  // ErrorMsg
 		nil, // Stats
 		0,   // TotalTickets
 		0,   // TotalBooked
 		9,   // TotalAvailable
-		os.Getenv("ADVLIGHT_PASSWORD"),
+		os.Getenv("ADVLIGHT_PASSWORD"), // Password
+		"", // AddTickets
 	}
 
 	if r.Method == "POST" {
-		if r.FormValue("password") == data.Password {
+
+		if r.FormValue("addTickets") != "" && r.FormValue("password") == data.Password {
+			var addSlot, addCount int
+			// add value will be addSlot+AddCount
+			parts := strings.Split(r.FormValue("addTickets"), "+")
+			if len(parts) == 2 {
+				addSlot, _ = strconv.Atoi(parts[0])
+				addCount, _ = strconv.Atoi(parts[1])
+			}
+			if addSlot > 0 && addCount > 0 {
+				err := tickets.Repo.CreateSlots("", addSlot, addCount)
+				if err != nil {
+					data.ErrorMsg = err.Error()
+				}
+			}
+		}
+
+		if r.FormValue("password") == data.Password && data.ErrorMsg == "" {
 			data.Stats, err = tickets.Repo.GetSlotsStats()
 			if err != nil {
 				data.ErrorMsg = err.Error()
@@ -38,6 +59,8 @@ func TicketAdminHandler(w http.ResponseWriter, r *http.Request) {
 					data.TotalBooked += (s.NumberTickets - s.AvailableTickets)
 					data.TotalAvailable += s.AvailableTickets
 				}
+				// blow out the cache (use the low-request admin handler as cheap cache invalidation)
+				tickets.Repo.ClearCache()
 			}
 		} else {
 			data.ErrorMsg = "Invalid password"

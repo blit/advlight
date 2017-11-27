@@ -39,6 +39,8 @@ func LoadTemplates() error {
 	}
 	if isProduction {
 		fmt.Println("using production assets: ", assets.AssetNames())
+	} else {
+		reloadTemplates = true
 	}
 
 	GAID := os.Getenv("ADVLIGHT_GAID")
