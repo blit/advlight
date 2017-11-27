@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +16,37 @@ import (
 )
 
 func main() {
+	cmdPtr := flag.String("cmd", "server", "-cmd: server(default) || expired")
+	flag.Parse()
+	switch *cmdPtr {
+	case "expired":
+		fmt.Println("running expired tickets cmd")
+		guests, err := tickets.Repo.GetExpiredGuests("1 hour")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("notifying %d\n guests of expiration", len(guests))
+		for _, g := range guests {
+			slot := g.Tickets[0]
+			em := tickets.ExpirationEmail(*g, slot.Slot)
+			subject := fmt.Sprintf("Your Bayside Christmas Drive-Thru ticket request expired (%s)", slot.Slot.Format("Jan 02, 3:04pm"))
+			err = tickets.Mailer.Send(g.Email, subject, em)
+			if err != nil {
+				fmt.Println("ERROR", g.Email, err)
+			}
+			err = tickets.Repo.CancelTicket(g, slot.Slot)
+			if err != nil {
+				fmt.Println("DB-ERROR", g.Email, err)
+			}
+		}
+		return
+	default:
+		runServer()
+	}
+	return
+}
+
+func runServer() {
 	r := chi.NewRouter()
 	// A good base middleware stack
 	r.Use(middleware.RequestID)

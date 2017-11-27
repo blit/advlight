@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/matcornic/hermes"
@@ -14,8 +15,10 @@ import (
 
 var mailer *hermes.Hermes
 var smtpConfig *smtpconfig
+var Mailer *mailerHelper
 
 func init() {
+	Mailer = &mailerHelper{}
 	mailer = &hermes.Hermes{
 		// Optional Theme
 		Theme: new(hermes.Flat),
@@ -54,7 +57,6 @@ func ConfirmationEmail(g Guest, slot time.Time) hermes.Email {
 					},
 				},
 				{
-					//					Instructions: "Donations:",
 					Button: hermes.Button{
 						Color: "#235E6F",
 						Text:  "Donate",
@@ -70,7 +72,38 @@ func ConfirmationEmail(g Guest, slot time.Time) hermes.Email {
 	}
 }
 
-func SendEmail(address string, email hermes.Email) error {
+func ExpirationEmail(g Guest, slot time.Time) hermes.Email {
+	return hermes.Email{
+		Body: hermes.Body{
+			Name: g.Email,
+			Intros: []string{
+				fmt.Sprintf("Your Bayside Christmas Drive-Thru ticket request for %s has expired.  If you would still like a ticket, use the link below to select a ticket and then be sure to click the confirmation link sent to you.  If you do not click the confirmation link, your ticket will expire.", slot.Format("Jan 02, 3:04pm")),
+			},
+			Actions: []hermes.Action{
+				{
+					Instructions: "To get another ticket, or to view your tickets:",
+					Button: hermes.Button{
+						Color: "#0F8A5F",
+						Text:  "Get | View Tickets",
+						Link:  g.GetGuestURL(),
+					},
+				},
+			},
+			Outros: []string{
+				"If you did not request this ticket no further action is required on your part and you will not be sent further emails or added to an email list.",
+			},
+			Signature: "Merry Christmas!",
+		},
+	}
+}
+
+type mailerHelper struct {
+	sync   sync.Mutex
+	dialer *gomail.Dialer
+	sender gomail.SendCloser
+}
+
+func (m *mailerHelper) Send(address, subject string, email hermes.Email) error {
 	// Generate an HTML email with the provided contents (for modern clients)
 	htmlpart, err := mailer.GenerateHTML(email)
 	if err != nil {
@@ -81,29 +114,46 @@ func SendEmail(address string, email hermes.Email) error {
 	if err != nil {
 		return err
 	}
-	m := gomail.NewMessage()
-	m.SetHeader("From", `"Bayside Christmas Lights" <support@blit.com>`)
-	m.SetHeader("To", address)
-	m.SetHeader("Subject", "Confirm and View your Bayside Christmas Drive-Thru Tickets")
-	m.SetBody("text/plain", textpart)
-	m.AddAlternative("text/html", htmlpart)
+	msg := gomail.NewMessage()
+	msg.SetHeader("From", `"Bayside Christmas Lights" <support@blit.com>`)
+	msg.SetHeader("To", address)
+	msg.SetHeader("Subject", subject)
+	msg.SetBody("text/plain", textpart)
+	msg.AddAlternative("text/html", htmlpart)
 
-	log.Println("sending email to ", m.GetHeader("To"))
+	log.Println("sending email to ", msg.GetHeader("To"))
 	if smtpConfig.Hostname == "" {
-		m.WriteTo(os.Stdout)
+		msg.WriteTo(os.Stdout)
 		return nil
 	}
 
-	d := gomail.NewDialer(smtpConfig.Hostname, smtpConfig.Port, smtpConfig.Username, smtpConfig.Password)
-	s, err := d.Dial()
-	if err != nil {
-		return err
+	m.sync.Lock()
+	// defer m.sync.Unlock()
+	// cant defer here because we recurse once on error and can get a panic sync: unlock of unlocked mutex
+	if m.dialer == nil {
+		m.dialer = gomail.NewDialer(smtpConfig.Hostname, smtpConfig.Port, smtpConfig.Username, smtpConfig.Password)
 	}
-	err = gomail.Send(s, m)
-	if err != nil {
-		return err
+	tryAgain := false
+	if m.sender == nil {
+		m.sender, err = m.dialer.Dial()
+		if err != nil {
+			m.sender = nil
+			m.sync.Unlock()
+			return err
+		}
+	} else {
+		tryAgain = true // retry the email if the sender has been closed
 	}
-	return nil
+
+	err = gomail.Send(m.sender, msg)
+	if err != nil && tryAgain {
+		m.sender.Close()
+		m.sender = nil
+		m.sync.Unlock()
+		return m.Send(address, subject, email)
+	}
+	m.sync.Unlock()
+	return err
 }
 
 type smtpconfig struct {

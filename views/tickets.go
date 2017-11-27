@@ -207,7 +207,7 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		em := tickets.ConfirmationEmail(*guest, slotTime)
-		err = tickets.SendEmail(guest.Email, em)
+		err = tickets.Mailer.Send(guest.Email, "Confirm and View your Bayside Christmas Drive-Thru Tickets", em)
 		if err != nil {
 			data.ErrorMsg = err.Error()
 			Render(w, "index.html", data)

@@ -56,6 +56,10 @@ func (g Guest) GetTicketURL(slot time.Time) string {
 	return HostName + "/" + g.GetToken() + "/ticket/" + strconv.Itoa(int(slot.Unix()))
 }
 
+func (g Guest) GetGuestURL() string {
+	return HostName + "/" + g.GetToken()
+}
+
 type Ticket struct {
 	Slot      time.Time
 	Number    int64
@@ -181,6 +185,54 @@ func (r *repo) GetGuest(guestID string) (*Guest, error) {
 
 	return g, nil
 }
+
+func (r *repo) GetExpiredGuests(age string) ([]*Guest, error) {
+	log.Println(`GetExpiredGuests`, age)
+	rows, err := r.db.Query(`select g.id,g.email,g.verified,t.slot,t.num,t.event_code from guests g join tickets t on (g.id=t.guest_id) where g.verified = false and g.created_at<(current_timestamp-$1::interval) order by t.slot;`, age)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	guests := make([]*Guest, 0)
+	for rows.Next() {
+		var (
+			tslot  pq.NullTime
+			tnum   sql.NullInt64
+			tevent sql.NullString
+		)
+
+		g := &Guest{
+			Tickets: make([]Ticket, 0),
+		}
+		err = rows.Scan(&(g.ID), &(g.Email), &(g.Verified), &tslot, &tnum, &tevent)
+		if err != nil {
+			return nil, err
+		}
+		if tslot.Valid {
+			g.Tickets = append(g.Tickets, Ticket{
+				Slot:      tslot.Time,
+				Number:    tnum.Int64,
+				GuestID:   g.ID,
+				EventCode: tevent.String,
+			})
+		}
+		if len(guests) > 0 && guests[len(guests)-1].ID == g.ID {
+			if len(g.Tickets) > 0 {
+				existing := guests[len(guests)-1]
+				existing.Tickets = append(existing.Tickets, g.Tickets[0])
+			}
+		} else {
+			guests = append(guests, g)
+		}
+	}
+	return guests, nil
+}
+
+//select count(*) from guests g join tickets t on g.id=t.guest_id where verified = false and created_at<(current_timestamp-'1 hour'::interval);
+
+//select array_agg(g.email) from guests g join tickets t on g.id=t.guest_id and t.slot::time = '21:30'::time;
+
+//select count(*) from guests g join tickets t on g.id=t.guest_id and g.verified is null
 
 func (r *repo) VerifyGuest(g *Guest) error {
 	_, err := r.db.Exec("update guests set verified=true where id=$1 and verified=false", g.ID)
