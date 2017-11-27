@@ -400,7 +400,7 @@ func (r *repo) CreateGuest(g *Guest) error {
 // GetSlotsStats gets all slots, not cached because it is behind an admin screen
 func (r *repo) GetSlotsStats() ([]SlotStat, error) {
 	log.Println("GetSlotsStats")
-	rows, err := r.db.Query(`select coalesce(event_code,''),slot,count(*), count(*) filter(where guest_id is null) from tickets group by event_code,slot order by slot,event_code NULLS LAST;`)
+	rows, err := r.db.Query(`select coalesce(event_code,''),slot,count(*), count(*) filter(where guest_id is null) from tickets where slot::date>=now()::date group by event_code,slot order by slot,event_code NULLS LAST;`)
 	if err != nil {
 		return nil, err
 	}

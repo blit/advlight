@@ -140,6 +140,16 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 		RenderError(w, err)
 		return
 	}
+
+	// only show current slots
+	cutOff := time.Now().Add(-(time.Minute * 30))
+	for {
+		if len(slots) < 1 || slots[0].Slot.After(cutOff) {
+			break
+		}
+		slots = slots[1:]
+	}
+
 	if len(slots) < 1 && data.EventCode != "" {
 		data.ErrorMsg = fmt.Sprintf("%s is an invalid event code or is no longer valid", data.EventCode)
 		data.EventCode = ""
