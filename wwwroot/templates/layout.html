@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id={{ gaID }}"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', '{{ gaID }}');
+	</script>
+	
 	<!-- Favicons -->
 	<link rel="icon" sizes="16x16 32x32" href="https://s3-us-west-1.amazonaws.com/baysideonline4.0/assets/favicon.png">
 	<!--[if IE]><link rel="shortcut icon" href="https://s3-us-west-1.amazonaws.com/baysideonline4.0/assets/favicon.ico"><![endif]-->

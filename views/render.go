@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -23,72 +24,48 @@ func init() {
 }
 
 func LoadTemplates() error {
-	if strings.EqualFold(os.Getenv("ADVLIGHT_ENV"), "production") {
-		return loadTemplatesProd()
-	} else {
-		reloadTemplates = true
-		return loadTemplatesDev()
-	}
-}
-
-func loadTemplatesProd() error {
-	fmt.Println(assets.AssetNames())
 	tplPath := "wwwroot/templates/"
-	layout, err := template.New("layout.html").Parse(string(assets.MustAsset(tplPath + "layout.html")))
+	isProduction := strings.EqualFold(os.Getenv("ADVLIGHT_ENV"), "production")
+	loader := func(name string) string {
+		path := tplPath + name
+		if isProduction {
+			return string(assets.MustAsset(path))
+		}
+		b, err := ioutil.ReadFile(path)
+		if err != nil {
+			panic(fmt.Errorf("unable to load %s: %+v", path, err))
+		}
+		return string(b)
+	}
+	if isProduction {
+		fmt.Println("using production assets: ", assets.AssetNames())
+	}
+
+	GAID := os.Getenv("ADVLIGHT_GAID")
+	layout, err := template.New("layout.html").Funcs(
+		template.FuncMap{
+			"gaID": func() string {
+				return GAID
+			},
+		},
+	).Parse(loader("layout.html"))
 	if err != nil {
 		return err
 	}
 
-	fn := func(name string) error {
+	for _, name := range []string{
+		"index.html",
+		"ticket.html",
+		"admin.html",
+	} {
 		t, err := layout.Clone()
 		if err != nil {
 			return err
 		}
-		templates[name] = template.Must(t.Parse(string(assets.MustAsset(tplPath + name))))
-		return nil
-	}
-	for _, name := range []string{
-		"index.html",
-		"ticket.html",
-		"admin.html",
-	} {
-		err := fn(name)
-		if err != nil {
-			return err
-		}
+		templates[name] = template.Must(t.Parse(loader(name)))
 	}
 	return nil
-}
 
-func loadTemplatesDev() error {
-	tplPath := "wwwroot/templates"
-	layoutPath := tplPath + "/layout.html"
-	fn := func(name string) error {
-		t, err := template.ParseFiles(layoutPath, tplPath+"/"+name)
-		if err != nil {
-			return err
-		}
-		templates[name] = t
-		return nil
-	}
-	for _, name := range []string{
-		"index.html",
-		"ticket.html",
-		"admin.html",
-	} {
-		err := fn(name)
-		if err != nil {
-			return err
-		}
-	}
-	// no template for ticket
-	t, err := template.ParseFiles(tplPath + "/ticket.html")
-	if err != nil {
-		return err
-	}
-	templates["ticket.html"] = t
-
-	return nil
 }
 
 func RenderError(wr io.Writer, err error) {
