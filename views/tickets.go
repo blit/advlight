@@ -144,9 +144,10 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 	// only show current slots
 	cutOff := time.Now().Add(-(time.Minute * 30))
 	for {
-		if len(slots) < 1 || slots[0].Slot.After(cutOff) {
+		if len(slots) < 1 || slots[0].Slot.YearDay() > cutOff.YearDay() || slots[0].Slot.Hour() >= cutOff.Hour() {
 			break
 		}
+		//log.Printf("removing %+v; cutoff %+v", slots[0], cutOff)
 		slots = slots[1:]
 	}
 
