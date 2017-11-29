@@ -84,6 +84,7 @@ func Render(wr io.Writer, template string, data interface{}) {
 	}
 	err := templates[template].Execute(wr, data)
 	if err != nil {
-		log.Panicf("[ERROR] Error rendering %s: %s\n", template, err)
+		log.Printf("[ERROR] Error rendering %s: %s\n", template, err)
+		RenderError(wr, err)
 	}
 }
