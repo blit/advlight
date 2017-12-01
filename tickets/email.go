@@ -97,6 +97,52 @@ func ExpirationEmail(g Guest, slot time.Time) hermes.Email {
 	}
 }
 
+func GraceEmail(g Guest) hermes.Email {
+	return hermes.Email{
+		Body: hermes.Body{
+			Name: g.Email,
+			Intros: strings.Split(`
+				Merry Christmas from Bayside!
+				
+			 We have a first for Bayside... our Special Christmas Event at our Granite Bay Campus sold out in less then three days. While we’re grateful, this means thousands of families are currently unable to come to a Christmas Eve Service.
+				
+			 Our solution has been to move our Granite Bay Christmas Experience to our Adventure Campus which will add 10,000+ new seats for families across the region. Unfortunately, this means we need to close our Drive Thru on the following dates:
+				
+			 December 15, 19, 20,21 and 23.
+				
+			 Because you have reserved a ticket on one of those dates, we hope you understand and join us on another night. We’ve added tickets on almost every other night to accommodate and will give you priority to those. We know this can be an inconvenience so we want to help make changing your time a little easier. 
+
+			 Your existing ticket(s) for December 15, 19, 20,21 and 23 will remain in the system for a few days and then be deleted (please cancel it once you've selected a different ticket).
+				
+			 To change your reservation to another night, use the buttons below to pick another ticket.
+				
+			`, "\n"),
+			Actions: []hermes.Action{
+				{
+					Instructions: "GRACE event code reserved tickets (added exclusively for people that had a ticket for December 15, 19, 20, 21 and 23).",
+					Button: hermes.Button{
+						Color: "#0F8A5F",
+						Text:  "Get | GRACE Tickets",
+						Link:  g.GetGuestURL() + "?event=grace",
+					},
+				},
+				{
+					Instructions: "All available general admission tickets:",
+					Button: hermes.Button{
+						Color: "#0F8A5F",
+						Text:  "Get | General Tickets",
+						Link:  g.GetGuestURL(),
+					},
+				},
+			},
+			Outros: []string{
+				"Thank you for patience and understanding.",
+			},
+			Signature: "Merry Christmas!",
+		},
+	}
+}
+
 type mailerHelper struct {
 	sync   sync.Mutex
 	dialer *gomail.Dialer

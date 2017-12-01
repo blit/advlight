@@ -213,7 +213,7 @@ func (r *repo) GetGuest(guestID string) (*Guest, error) {
 
 func (r *repo) GetExpiredGuests(age string) ([]*Guest, error) {
 	log.Println(`GetExpiredGuests`, age)
-	rows, err := r.db.Query(`select g.id,g.email,g.verified,t.slot,t.num,t.event_code from guests g join tickets t on (g.id=t.guest_id) where g.verified = false and g.created_at<(current_timestamp-$1::interval) order by t.slot;`, age)
+	rows, err := r.db.Query(`select g.id,g.email,g.verified,t.slot,t.num,t.event_code from guests g join tickets t on (g.id=t.guest_id) where g.verified = false and g.created_at<(current_timestamp-$1::interval) order by g.id,t.slot;`, age)
 	if err != nil {
 		return nil, err
 	}
@@ -249,6 +249,27 @@ func (r *repo) GetExpiredGuests(age string) ([]*Guest, error) {
 		} else {
 			guests = append(guests, g)
 		}
+	}
+	return guests, nil
+}
+
+func (r *repo) GetEventCodeGuests(eventCode string) ([]*Guest, error) {
+	log.Println(`GetEventCodeGuests`, eventCode)
+	rows, err := r.db.Query(`select g.id,g.email,g.verified from guests g join tickets t on (g.id=t.guest_id) where t.event_code=$1;`, eventCode)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	guests := make([]*Guest, 0)
+	for rows.Next() {
+		g := &Guest{
+			Tickets: make([]Ticket, 0),
+		}
+		err = rows.Scan(&(g.ID), &(g.Email), &(g.Verified))
+		if err != nil {
+			return nil, err
+		}
+		guests = append(guests, g)
 	}
 	return guests, nil
 }
