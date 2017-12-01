@@ -59,11 +59,19 @@
                 </select>
             </div>
             <div style="margin-top:-5px;">
-                {{ if not .EventCode }}
+                {{ if .EventCode }}
+                <div id="eventcode_q" style="margin-bottom:10px;">
+                    You are viewing tickets for the <strong style="text-transform: uppercase">{{ .EventCode }}</strong> event code.
+                    If you do not see an available ticket, click remove event code for all general admission tickets.
+                    <input type="hidden" name="seteventcode_new" type="text" class="form-control" value=" ">
+                    <button name="seteventcode" value="set" class="btn btn-warning btn-sm" type="submit">Remove Event Code</button>
+                </div>
+    
+                {{ else }}
                 <div id="eventcode_q" style="margin-bottom:10px;">
                     <a href="#" onclick="toggleEventCode();return(false);">have an event code?</a>
                 </div>
-                {{ end }}
+                
                 <div id="eventcode_a" style="margin-bottom:10px; {{ if not .EventCode }}display:none;{{end}}">
                     <div class="input-group">
                         <span class="input-group-addon" id="sizing-addon1">Event Code:</span>
@@ -72,7 +80,8 @@
                           <button name="seteventcode" value="set" class="btn btn-success" type="submit"> Set </button>                            
                         </span>
                     </div>                    
-                </div>                
+                </div>
+                {{ end }}
             </div>
             {{ if .Guest }}
                 <button type="submit" class="btn btn-danger btn-lg" style="width:100%">Update/Get Ticket</button>

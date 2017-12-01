@@ -14,6 +14,24 @@ import (
 )
 
 func main() {
+	runServer()
+}
+
+func addTickets() {
+	slots, err := tickets.Repo.GetSlots("")
+	if err != nil {
+		log.Panicln(err)
+	}
+	for _, s := range slots {
+		tickets.Repo.CreateSlots("grace", int(s.Slot.Unix()), 50)
+		log.Println(s.Slot, s.AvailableTickets)
+		if err != nil {
+			log.Panicln(err)
+		}
+	}
+}
+
+func runServer() {
 	r := chi.NewRouter()
 	// A good base middleware stack
 	r.Use(middleware.RequestID)

@@ -26,6 +26,7 @@ func init() {
 func LoadTemplates() error {
 	tplPath := "wwwroot/templates/"
 	isProduction := strings.EqualFold(os.Getenv("ADVLIGHT_ENV"), "production")
+	log.Println(LoadTemplates, isProduction, tplPath)
 	loader := func(name string) string {
 		path := tplPath + name
 		if isProduction {
