@@ -148,10 +148,10 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		if slots[0].Slot.YearDay() > cutOff.YearDay() || (slots[0].Slot.YearDay() == cutOff.YearDay() && slots[0].Slot.Hour() >= cutOff.Hour()) {
-			log.Printf("breaking slot cutoff %+v; cutoff %+v  %d>%d", slots[0].Slot, cutOff, slots[0].Slot.Hour(), cutOff.Hour())
+			//log.Printf("breaking slot cutoff %+v; cutoff %+v  %d>%d", slots[0].Slot, cutOff, slots[0].Slot.Hour(), cutOff.Hour())
 			break
 		}
-		log.Printf("removing %+v; cutoff %+v", slots[0].Slot, cutOff)
+		//log.Printf("removing %+v; cutoff %+v", slots[0].Slot, cutOff)
 		slots = slots[1:]
 	}
 
