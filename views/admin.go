@@ -1,6 +1,7 @@
 package views
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -71,4 +72,33 @@ func TicketAdminHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("TicketAdminHandler", data.ErrorMsg)
 	Render(w, "admin.html", data)
 	return
+}
+
+// TicketAdminExpiresHandler expires tickets, send email notices
+func TicketAdminExpiresHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "text/plain")
+	if r.URL.Query().Get("pwd") != os.Getenv("ADVLIGHT_PASSWORD") {
+		w.Write([]byte("invalid password"))
+		return
+	}
+	guests, err := tickets.Repo.GetExpiredGuests("1 hour")
+	if err != nil {
+		panic(err)
+	}
+	w.Header().Add("Content-Type", "text/plain")
+	w.Write([]byte(fmt.Sprintf("notifying %d\n guests of expiration", len(guests))))
+	for _, g := range guests {
+		slot := g.Tickets[0]
+		em := tickets.ExpirationEmail(*g, slot.Slot)
+		subject := fmt.Sprintf("Your Bayside Christmas Drive-Thru ticket request expired (%s)", slot.Slot.Format("Jan 02, 3:04pm"))
+		err = tickets.Mailer.Send(g.Email, subject, em)
+		if err != nil {
+			w.Write([]byte(fmt.Sprintf("ERROR %s %s", g.Email, err.Error())))
+		}
+		err = tickets.Repo.CancelTicket(g, slot.Slot)
+		if err != nil {
+			w.Write([]byte(fmt.Sprintf("DB-ERROR %s %s", g.Email, err.Error())))
+		}
+	}
+
 }
