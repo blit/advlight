@@ -143,6 +143,38 @@ func GraceEmail(g Guest) hermes.Email {
 	}
 }
 
+func GraceFixEmail(g Guest) hermes.Email {
+	return hermes.Email{
+		Body: hermes.Body{
+			Name: g.Email,
+			Intros: strings.Split(`
+			Merry Christmas from Bayside!
+				
+			 Please disregard the last email advising your Christmas Drive Thru Ticket has been cancelled.
+				
+			 Your ticket is for the 22nd and is not affected by the closure on December 15, 19, 20,21 and 23.
+				
+			 Sorry for the confusion.
+				
+			`, "\n"),
+			Actions: []hermes.Action{
+				{
+					Instructions: "To view your ticket, or change the time, use the button below:",
+					Button: hermes.Button{
+						Color: "#0F8A5F",
+						Text:  "Get | View Tickets",
+						Link:  g.GetGuestURL(),
+					},
+				},
+			},
+			Outros: []string{
+				"Thank you for patience and understanding.",
+			},
+			Signature: "Merry Christmas!",
+		},
+	}
+}
+
 type mailerHelper struct {
 	sync   sync.Mutex
 	dialer *gomail.Dialer

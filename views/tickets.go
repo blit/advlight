@@ -100,7 +100,11 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	log.Printf("TicketIndexHandler %+v\n", data)
+	defer func() {
+		// remove slots from log, too noisy
+		data.Slots = nil
+		log.Printf("TicketIndexHandler %+v\n", data)
+	}()
 
 	if r.Method == "POST" {
 		var err error
@@ -122,7 +126,7 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// event codes affect the slots so need to be processed before calling GetSlots
 	// get the eventcode & slots
-	if data.EventCode == "" {
+	if strings.TrimSpace(data.EventCode) == "" {
 		data.EventCode = r.FormValue("eventcode")
 	}
 	// see if the event code is being set to a new one
@@ -130,7 +134,7 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 		data.EventCode = r.FormValue("seteventcode_new")
 	}
 	// see if the event code is being cleared
-	if r.FormValue("seteventcode") == "clear" {
+	if r.FormValue("seteventcode_new") == "!clr" {
 		data.EventCode = ""
 	}
 

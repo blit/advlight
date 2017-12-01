@@ -274,6 +274,27 @@ func (r *repo) GetEventCodeGuests(eventCode string) ([]*Guest, error) {
 	return guests, nil
 }
 
+func (r *repo) GetGuestsByDate(date string) ([]*Guest, error) {
+	log.Println(`GetGuestsByDate`, date)
+	rows, err := r.db.Query(`select g.id,g.email,g.verified from guests g join tickets t on (g.id=t.guest_id) where t.slot::date=$1::date;`, date)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	guests := make([]*Guest, 0)
+	for rows.Next() {
+		g := &Guest{
+			Tickets: make([]Ticket, 0),
+		}
+		err = rows.Scan(&(g.ID), &(g.Email), &(g.Verified))
+		if err != nil {
+			return nil, err
+		}
+		guests = append(guests, g)
+	}
+	return guests, nil
+}
+
 //select count(*) from guests g join tickets t on g.id=t.guest_id where verified = false and created_at<(current_timestamp-'1 hour'::interval);
 
 //select array_agg(g.email) from guests g join tickets t on g.id=t.guest_id and t.slot::time = '21:30'::time;

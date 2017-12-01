@@ -63,8 +63,8 @@
                 <div id="eventcode_q" style="margin-bottom:10px;">
                     You are viewing tickets for the <strong style="text-transform: uppercase">{{ .EventCode }}</strong> event code.
                     If you do not see an available ticket, click remove event code for all general admission tickets.
-                    <input type="hidden" name="seteventcode_new" type="text" class="form-control" value=" ">
-                    <button name="seteventcode" value="set" class="btn btn-warning btn-sm" type="submit">Remove Event Code</button>
+                    <input type="hidden" name="seteventcode_new" type="text" class="form-control" value="{{ .EventCode }}">
+                    <button onclick="this.form.seteventcode_new.value='!clr';return(true);" name="seteventcode" value="set" class="btn btn-warning btn-sm" type="submit">Remove Event Code</button>
                 </div>
     
                 {{ else }}

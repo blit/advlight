@@ -15,18 +15,21 @@ import (
 
 func main() {
 	runServer()
+	//addTickets()
 }
 
 func addTickets() {
-	slots, err := tickets.Repo.GetSlots("")
+	slots, err := tickets.Repo.GetSlotsStats()
 	if err != nil {
 		log.Panicln(err)
 	}
 	for _, s := range slots {
-		tickets.Repo.CreateSlots("grace", int(s.Slot.Unix()), 50)
-		log.Println(s.Slot, s.AvailableTickets)
-		if err != nil {
-			log.Panicln(err)
+		if s.EventCode != "" {
+			continue
+		}
+		if s.AvailableTickets == 0 {
+			tickets.Repo.CreateSlots("grace", int(s.Slot.Unix()), 50)
+			log.Println(s.Slot, s.AvailableTickets)
 		}
 	}
 }
