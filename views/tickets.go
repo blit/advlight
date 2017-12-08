@@ -214,6 +214,16 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 			Render(w, "index.html", data)
 			return
 		}
+		// captcha should be used if no guest id
+		if guest.ID == "" {
+			_, err := tickets.CAPTCHAVerify(r.FormValue("g-recaptcha-response"), r.RemoteAddr)
+			if err != nil {
+				data.ErrorMsg = err.Error()
+				Render(w, "index.html", data)
+				return
+			}
+		}
+
 		err = tickets.Repo.AssignTicket(guest, slotTime, data.EventCode)
 		if err != nil {
 			data.ErrorMsg = err.Error()
