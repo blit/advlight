@@ -3,6 +3,7 @@ package tickets
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -57,6 +58,11 @@ func CAPTCHAVerify(response string, remoteip string) (Response, error) {
 	}
 
 	resp := Response{Success: false}
+	respStart := time.Now()
+
+	defer func() {
+		log.Printf("CAPTCHAVerify %s %v", time.Now().Sub(respStart), resp)
+	}()
 
 	r, err := reClient.PostForm(VerificationURL, params)
 
