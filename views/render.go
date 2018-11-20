@@ -9,6 +9,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/blit/advlight/tickets"
+
 	"github.com/blit/advlight/views/assets"
 )
 
@@ -49,6 +51,12 @@ func LoadTemplates() error {
 		template.FuncMap{
 			"gaID": func() string {
 				return GAID
+			},
+			"CAPTCHADisabled": func() string {
+				if tickets.CAPTCHADisabled {
+					return "true"
+				}
+				return "false"
 			},
 		},
 	).Parse(loader("layout.html"))

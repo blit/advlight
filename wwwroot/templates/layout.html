@@ -33,7 +33,9 @@
 	-->
 	<title>Bayside Christmas Lights Drive-Thru</title>
 	{{ block "head" . }}{{ end }}
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+	{{if eq CAPTCHADisabled "false" }}
+		<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+	{{end}}
   <script>
     function onNonValidtedSubmit(token) {
       document.getElementById("ticketForm").submit();

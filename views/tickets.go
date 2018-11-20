@@ -219,8 +219,8 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 		captchResp := strings.TrimSpace(r.FormValue("g-recaptcha-response"))
 		if (guestID == "" && !guest.Verified) || captchResp != "" {
 			_, err := tickets.CAPTCHAVerify(captchResp, r.RemoteAddr)
-			if err != nil {
-				data.ErrorMsg = err.Error()
+			if err != nil && !tickets.CAPTCHADisabled {
+				data.ErrorMsg = "CAPTCHAVerify error: " + err.Error()
 				Render(w, "index.html", data)
 				return
 			}

@@ -3,6 +3,7 @@ package tickets
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"log"
 	"net"
 	"net/http"
@@ -16,6 +17,9 @@ import (
 var VerificationURL = "https://www.google.com/recaptcha/api/siteverify"
 var reCAPTCHASecret = ""
 var reClient = &http.Client{Timeout: 20 * time.Second}
+
+// CAPTCHADisabled disables captcha requirements if true
+var CAPTCHADisabled = false
 
 // Response is the JSON structure that is returned by the verification API after a challenge response is verified.
 // @see https://developers.google.com/recaptcha/docs/verify#api-response
@@ -32,6 +36,10 @@ type Response struct {
 	ErrorCodes []string `json:"error-codes"`
 }
 
+func init() {
+	flag.BoolVar(&CAPTCHADisabled, "nocaptcha", true, "disabled captcha")
+}
+
 // Verify the users's response to the reCAPTCHA challenge with the API server.
 //
 // The parameter response is obtained after the user successfully solves the challenge presented by the JS widget. The
@@ -40,6 +48,13 @@ type Response struct {
 // CAPTCHAVerify function will return a boolean that will have the final result returned by the API as well as an optional list
 // of errors. They might be useful for logging purposed but you don't have to show them to the user.
 func CAPTCHAVerify(response string, remoteip string) (Response, error) {
+
+	resp := Response{Success: false}
+	respStart := time.Now()
+
+	if CAPTCHADisabled {
+		return resp, errors.New("CAPTCHA Disabled")
+	}
 
 	params := url.Values{}
 
@@ -56,9 +71,6 @@ func CAPTCHAVerify(response string, remoteip string) (Response, error) {
 	if net.ParseIP(remoteip) != nil {
 		params.Set("remoteip", remoteip)
 	}
-
-	resp := Response{Success: false}
-	respStart := time.Now()
 
 	defer func() {
 		log.Printf("CAPTCHAVerify %s %v", time.Now().Sub(respStart), resp)
