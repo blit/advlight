@@ -51,14 +51,14 @@ func ConfirmationEmail(g Guest, slot time.Time) hermes.Email {
 				{
 					Instructions: "Click the button below to confirm/view your ticket:",
 					Button: hermes.Button{
-						Color: "#0F8A5F",
+						Color: "#4CAF50",
 						Text:  "Confirm | View Ticket",
 						Link:  g.GetTicketURL(slot),
 					},
 				},
 				{
 					Button: hermes.Button{
-						Color: "#235E6F",
+						Color: "#2196F3",
 						Text:  "Donate",
 						Link:  "https://granitebay.baysideonline.com/christmas-drive-thru-giving/",
 					},
