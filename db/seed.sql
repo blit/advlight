@@ -10,14 +10,10 @@ create table guests (
 );
 create unique index guests_email_key on guests(email);
 
--- timestampslot ensures that a timeslot is in the correct date/time contraints
--- must start at top of hour or half hour
--- and dates are from 2017-11-26-2017-12-31 with none on the 9th or 24th
+-- timestampslot ensures that a timeslot time is either top of hour or half hour
 CREATE DOMAIN timestampslot AS timestamptz
 CHECK(
   (to_char(VALUE,'MIUS') = '00000000' OR to_char(VALUE,'MIUS') = '30000000')
-  and (VALUE::date!='2017-12-09' and VALUE::date!='2017-12-24')
-  and (VALUE::date>='2017-11-26' and VALUE::date<='2017-12-31')
 );
 
 create table tickets (
