@@ -254,3 +254,25 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+
+func TicketFacesHandler(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		Tickets  []tickets.Ticket
+		ErrorMsg string
+	}{
+		nil, // Slots
+		"",  // ErrorMsg
+	}
+	// populate view data
+	days, err := tickets.Repo.GetSlotDates()
+	if err == nil {
+		data.Tickets = make([]tickets.Ticket, len(days))
+		for i, d := range days {
+			data.Tickets[i] = tickets.Ticket{Slot: d}
+		}
+	} else {
+		data.ErrorMsg = "error loading data " + err.Error()
+	}
+	Render(w, "ticketfaces.html", data)
+	return
+}

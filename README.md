@@ -17,6 +17,8 @@ GOOS=linux go build advlight.go
 ADVLIGHT_DATABASE_URL=[db_url]
 ADVLIGHT_ENV=production
 ADVLIGHT_SMTP=[username,password,host,port]
+ADVLIGHT_GAID=[captcha] # run with -nocaptcha flag to bypass captcha in dev
+ADVLIGHT_RECAPTCHA_SECRET=[captcha]
 
 # current deploy procedure
 scp advlight bcatickets.blit.com:advlight_update

@@ -68,23 +68,13 @@ type Ticket struct {
 }
 
 func (t Ticket) TicketImageURL() string {
-	switch t.Slot.Weekday() {
-	case time.Sunday:
-		return "/assets/img/bgimg-0.png"
-	case time.Monday:
-		return "/assets/img/bgimg-1.gif"
-	case time.Tuesday:
-		return "/assets/img/bgimg-2.jpg"
-	case time.Wednesday:
-		return "/assets/img/bgimg-3.jpg"
-	case time.Thursday:
-		return "/assets/img/bgimg-4.gif"
-	case time.Friday:
-		return "/assets/img/bgimg-5.gif"
-	case time.Saturday:
-		return "/assets/img/bgimg-6.gif"
+	daynum := t.Slot.Day()
+	if daynum == 9 {
+		daynum = 15 // show the kitty
+	} else if daynum > 16 {
+		daynum = daynum - 16
 	}
-	return "/assets/img/bgimg-0.png"
+	return fmt.Sprintf("/assets/img/bgimg-%d.jpg", daynum)
 }
 
 type Slot struct {
@@ -454,6 +444,33 @@ func (r *repo) GetSlotsStats() ([]SlotStat, error) {
 		slots = append(slots, *slot)
 	}
 	return slots, nil
+}
+
+var getSlotDatesCache []time.Time
+
+// GetSlotDates returns a cached array of time obj, 1 for each day there is a slot
+func (r *repo) GetSlotDates() ([]time.Time, error) {
+	if getSlotDatesCache != nil {
+		return getSlotDatesCache, nil
+	}
+	// race cond could exist, not big deal right now
+	log.Println("GetSlotsStats")
+	rows, err := r.db.Query(`select slot::date from tickets group by 1 order by 1;`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	getSlotDatesCache = make([]time.Time, 0)
+	for rows.Next() {
+		var dtstr string
+		rows.Scan(&dtstr)
+		dt, err := time.Parse(time.RFC3339, dtstr)
+		if err != nil {
+			return getSlotDatesCache, err
+		}
+		getSlotDatesCache = append(getSlotDatesCache, dt)
+	}
+	return getSlotDatesCache, nil
 }
 
 func (r *repo) ClearCache() {

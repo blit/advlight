@@ -54,6 +54,7 @@ func runServer() {
 	r.Post("/{guestID}", views.TicketIndexHandler)
 	r.Get("/{guestID}/ticket/{ticketID}", views.TicketShowHandler)
 	r.Get("/assets/img/{imageID}", views.AssetImageHandler)
+	r.Get("/ticketfaces", views.TicketFacesHandler)
 	if tickets.DatabaseURL == "" {
 		log.Println(os.Getenv("ADVLIGHT_DATABASE_URL"))
 		log.Fatal("ADVLIGHT_DATABASE_URL is not set; try export ADVLIGHT_DATABASE_URL=postgres://postgres@localhost/advlight?sslmode=disable")

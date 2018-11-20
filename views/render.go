@@ -59,6 +59,7 @@ func LoadTemplates() error {
 	for _, name := range []string{
 		"index.html",
 		"ticket.html",
+		"ticketfaces.html",
 		"admin.html",
 	} {
 		t, err := layout.Clone()

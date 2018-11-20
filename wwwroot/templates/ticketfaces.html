@@ -1,0 +1,11 @@
+{{ define "content" }}
+  {{ with .ErrorMsg}}<div class="alert alert-danger" role="alert">{{.}}</div>{{end}}
+
+  {{ range .Tickets }}
+    <div>
+      <div style="background-color: #efefef;">{{.Slot}} {{.TicketImageURL}}</div>
+      <img src="{{.TicketImageURL}}" class="img-fluid" style="max-height:100px;">
+    </div>
+  {{ end }}
+  
+{{ end }}
