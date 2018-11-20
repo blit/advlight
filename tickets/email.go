@@ -25,9 +25,9 @@ func init() {
 		Product: hermes.Product{
 			// Appears in header & footer of e-mails
 			Name: "Bayside Christmas Lights Drive-Thru",
-			Link: "http://christmas.baysideonline.com/lights",
+			Link: "https://christmas.baysideonline.com/lights",
 			// Optional product logo
-			Logo:      "http://v.fastcdn.co/t/c179d187/b85e76d2/1510270294-24260441-767x176x960x540x68x176-Christmas-Website---.png",
+			Logo:      "https://v.fastcdn.co/t/c179d187/b85e76d2/1510270294-24260441-767x176x960x540x68x176-Christmas-Website---.png",
 			Copyright: "Sent with Love from your friends at Bayside Church",
 		},
 	}
@@ -60,7 +60,7 @@ func ConfirmationEmail(g Guest, slot time.Time) hermes.Email {
 					Button: hermes.Button{
 						Color: "#235E6F",
 						Text:  "Donate",
-						Link:  "http://granitebay.baysideonline.com/christmas-drive-thru-giving/",
+						Link:  "https://granitebay.baysideonline.com/christmas-drive-thru-giving/",
 					},
 				},
 			},
