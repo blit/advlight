@@ -28,6 +28,8 @@ func TicketShowHandler(w http.ResponseWriter, r *http.Request) {
 
 	slot, err := strconv.ParseInt(ticketID, 10, 64)
 	slotTime := time.Unix(slot, 0)
+	// TODO remolve oopsSlotTime next year (I goofed and made all tickets for 2017 in 2018)
+	oopsSlotTime := time.Unix(slot+(60*60*24*365), 0)
 	if err != nil {
 		log.Printf("TicketShowHandler.invalid_ticket %s %v", ticketID, err)
 		data.ErrorMsg = fmt.Sprintf("%s is not a valid ticket", ticketID)
@@ -43,7 +45,7 @@ func TicketShowHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Guest = guest
 	for idx, t := range guest.Tickets {
-		if t.Slot.Equal(slotTime) {
+		if t.Slot.Equal(slotTime) || t.Slot.Equal(oopsSlotTime) {
 			data.Ticket = &(guest.Tickets[idx])
 			break
 		}
