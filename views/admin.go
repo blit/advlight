@@ -102,27 +102,3 @@ func TicketAdminExpiresHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-
-func TicketAdminGraceHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "text/plain")
-	if r.URL.Query().Get("pwd") != os.Getenv("ADVLIGHT_PASSWORD") {
-		w.Write([]byte("invalid password"))
-		return
-	}
-	guests, err := tickets.Repo.GetEventCodeGuests("!removed")
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Header().Add("Content-Type", "text/plain")
-	w.Write([]byte(fmt.Sprintf("notifying %d guests of grace\n\n", len(guests))))
-	for _, g := range guests {
-		em := tickets.GraceEmail(*g)
-		subject := "We're Sorry, Bayside Christmas Drive-Thru will not be OPEN the day of your ticket."
-		err = tickets.Mailer.Send(g.Email, subject, em)
-		if err != nil {
-			w.Write([]byte(fmt.Sprintf("ERROR %s %s", g.Email, err.Error())))
-		}
-	}
-
-}

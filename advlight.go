@@ -48,7 +48,6 @@ func runServer() {
 	r.Post("/admin", views.TicketAdminHandler)
 
 	r.Get("/admin/run_expired", views.TicketAdminExpiresHandler)
-	r.Get("/admin/run_grace", views.TicketAdminGraceHandler)
 
 	r.Get("/{guestID}", views.TicketIndexHandler)
 	r.Post("/{guestID}", views.TicketIndexHandler)
