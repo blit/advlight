@@ -26,6 +26,8 @@ ssh bcatickets.blit.com '~/advlight_deploy'
 
 # copy production db
 ssh -C bcatickets.blit.com "/usr/local/pgsql/bin/pg_dump -C -hlocalhost -Upostgres --no-owner --no-privileges advlight" | psql advlight
+# dumb guests as csv
+ssh bcatickets.blit.com "psql -hlocalhost -Upostgres advlight -c \"COPY (select * from guests) TO STDOUT WITH CSV\""
 
 ```
 
