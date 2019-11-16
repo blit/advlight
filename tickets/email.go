@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/blit/advlight/config"
 	"github.com/matcornic/hermes"
 	gomail "gopkg.in/gomail.v2"
 )
@@ -24,11 +25,11 @@ func init() {
 		Theme: new(hermes.Flat),
 		Product: hermes.Product{
 			// Appears in header & footer of e-mails
-			Name: "Bayside Christmas Lights Drive-Thru",
-			Link: "https://christmas.baysideonline.com/lights",
+			Name: config.EventName,
+			Link: config.EventLink,
 			// Optional product logo
-			Logo:      "https://v.fastcdn.co/t/c179d187/b85e76d2/1510270294-24260441-767x176x960x540x68x176-Christmas-Website---.png",
-			Copyright: "Sent with Love from your friends at Bayside Church",
+			Logo:      config.EventLogo,
+			Copyright: "Sent with Love from your friends at " + config.ChurchName,
 		},
 	}
 	smtpConfig = &smtpconfig{} // empty config will log emails (useful for dev)
@@ -41,29 +42,32 @@ func init() {
 }
 
 func ConfirmationEmail(g Guest, slot time.Time) hermes.Email {
+	actions := []hermes.Action{
+		{
+			Instructions: "Click the button below to confirm/view your ticket:",
+			Button: hermes.Button{
+				Color: "#4CAF50",
+				Text:  "Confirm | View Ticket",
+				Link:  g.GetTicketURL(slot),
+			},
+		},
+	}
+	if config.DonateLink != "" {
+		actions = append(actions, hermes.Action{
+			Button: hermes.Button{
+				Color: "#2196F3",
+				Text:  "Donate",
+				Link:  config.DonateLink,
+			},
+		})
+	}
 	return hermes.Email{
 		Body: hermes.Body{
 			Name: g.Email,
 			Intros: []string{
-				"You have received this email to confirm your ticket for the Bayside Christmas Lights Drive-Thru",
+				"You have received this email to confirm your ticket for " + config.EventName,
 			},
-			Actions: []hermes.Action{
-				{
-					Instructions: "Click the button below to confirm/view your ticket:",
-					Button: hermes.Button{
-						Color: "#4CAF50",
-						Text:  "Confirm | View Ticket",
-						Link:  g.GetTicketURL(slot),
-					},
-				},
-				{
-					Button: hermes.Button{
-						Color: "#2196F3",
-						Text:  "Donate",
-						Link:  "https://granitebay.baysideonline.com/christmas-drive-thru-giving/",
-					},
-				},
-			},
+			Actions: actions,
 			Outros: []string{
 				"If you did not request this reservation no further action is required on your part and you will not be sent further emails or added to an email list.",
 			},
@@ -77,7 +81,7 @@ func ExpirationEmail(g Guest, slot time.Time) hermes.Email {
 		Body: hermes.Body{
 			Name: g.Email,
 			Intros: []string{
-				fmt.Sprintf("Your Bayside Christmas Drive-Thru ticket request for %s has expired.  If you would still like a ticket, use the link below to select a ticket and then be sure to click the confirmation link sent to you.  If you do not click the confirmation link, your ticket will expire.", slot.Format("Jan 02, 3:04pm")),
+				fmt.Sprintf("Your %s ticket request for %s has expired.  If you would still like a ticket, use the link below to select a ticket and then be sure to click the confirmation link sent to you.  If you do not click the confirmation link, your ticket will expire.", config.EventName, slot.Format("Jan 02, 3:04pm")),
 			},
 			Actions: []hermes.Action{
 				{
@@ -115,7 +119,7 @@ func (m *mailerHelper) Send(address, subject string, email hermes.Email) error {
 		return err
 	}
 	msg := gomail.NewMessage()
-	msg.SetHeader("From", `"Bayside Christmas Lights" <support@blit.com>`)
+	msg.SetHeader("From", `"`+config.EventName+`" <support@blit.com>`)
 	msg.SetHeader("To", address)
 	msg.SetHeader("Subject", subject)
 	msg.SetBody("text/plain", textpart)

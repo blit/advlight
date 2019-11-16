@@ -1,10 +1,12 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/blit/advlight/config"
 	"github.com/blit/advlight/tickets"
 
 	"github.com/blit/advlight/views"
@@ -14,6 +16,8 @@ import (
 )
 
 func main() {
+	flag.BoolVar(&tickets.CAPTCHADisabled, "nocaptcha", false, "disabled captcha")
+	flag.Parse()
 	runServer()
 	//addTickets()
 }
@@ -41,6 +45,9 @@ func runServer() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		return
+	})
 	r.Get("/", views.TicketIndexHandler)
 	r.Post("/", views.TicketIndexHandler)
 
@@ -58,6 +65,6 @@ func runServer() {
 		log.Println(os.Getenv("ADVLIGHT_DATABASE_URL"))
 		log.Fatal("ADVLIGHT_DATABASE_URL is not set; try export ADVLIGHT_DATABASE_URL=postgres://postgres@localhost/advlight?sslmode=disable")
 	}
-	log.Println(tickets.HostName, "\n", tickets.DatabaseURL)
-	http.ListenAndServe(":8080", r)
+	log.Println(tickets.HostName, tickets.DatabaseURL, "CAPTCHADisabled:", tickets.CAPTCHADisabled)
+	log.Fatalln(http.ListenAndServe(config.Port, r))
 }

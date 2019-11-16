@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/blit/advlight/config"
 	"github.com/blit/advlight/tickets"
 	"github.com/go-chi/chi"
 )
@@ -51,7 +52,9 @@ func TicketShowHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if data.Ticket == nil {
-		data.ErrorMsg = "Sorry, this does not appear to be a valid ticket id, please check your link and try again"
+		data.ErrorMsg = `Sorry, no ticket found.  
+		This may be due to selecting a different time for the same day, which will cancel the old ticket. 
+		Click My Tickets below to see a list of tickets assigned to you.`
 	} else if !guest.Verified {
 		tickets.Repo.VerifyGuest(guest)
 	}
@@ -73,16 +76,18 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 		Email            string
 		EventCode        string
 		Guest            *tickets.Guest
+		DonateLink       string
 	}{
-		nil,   // Slots
-		0,     // SelectSlot
-		0,     // CancelSlot
-		"",    // ErrorMsg
-		"",    // SuccessMsg
-		false, // SentEmailConfirm
-		"",    // Email
+		nil,                        // Slots
+		0,                          // SelectSlot
+		0,                          // CancelSlot
+		"",                         // ErrorMsg
+		"",                         // SuccessMsg
+		false,                      // SentEmailConfirm
+		"",                         // Email
 		r.URL.Query().Get("event"), // EventCode
-		nil, // Guest
+		nil,                        // Guest
+		config.DonateLink,
 	}
 	// populate view data
 	if guestID != "" {
@@ -240,7 +245,7 @@ func TicketIndexHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		em := tickets.ConfirmationEmail(*guest, slotTime)
-		err = tickets.Mailer.Send(guest.Email, "Confirm and View your Bayside Christmas Drive-Thru Tickets", em)
+		err = tickets.Mailer.Send(guest.Email, "Confirm and View your "+config.EventName+" Tickets", em)
 		if err != nil {
 			data.ErrorMsg = err.Error()
 			Render(w, "index.html", data)

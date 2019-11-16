@@ -3,7 +3,6 @@ package tickets
 import (
 	"encoding/json"
 	"errors"
-	"flag"
 	"log"
 	"net"
 	"net/http"
@@ -34,10 +33,6 @@ type Response struct {
 
 	// Optional list of error codes returned by the service
 	ErrorCodes []string `json:"error-codes"`
-}
-
-func init() {
-	flag.BoolVar(&CAPTCHADisabled, "nocaptcha", true, "disabled captcha")
 }
 
 // Verify the users's response to the reCAPTCHA challenge with the API server.

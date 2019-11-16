@@ -21,24 +21,37 @@ create table tickets (
   num integer not null,
   updated_at timestamptz not null default current_timestamp,
   guest_id uuid references guests(id) on delete set null on update cascade,
+  event_code citext,
   PRIMARY KEY (slot,num)
 );
 create index tickets_guest_id_fkey on tickets(guest_id);
 
 with days as (
 select day from generate_series(
-  '2017-11-26 18:30:00'::timestamptz,
-  '2017-12-31 21:30:00'::timestamptz,
+  '2019-12-01 18:00:00'::timestamptz,
+  '2019-12-31 21:00:00'::timestamptz,
   '30 minutes'::interval
-) ms(day) where (day::time>='18:30'::time and day::time<='21:30' and day::date!='2017-12-09' and day::date!='2017-12-24')
+) ms(day) where (day::time>='18:00'::time and day::time<='21:00' and day::date!='2017-12-05' and day::date!='2017-12-24')
 ), ticket_numbers as (
-  select num from generate_series(1,150) num
+  select num from generate_series(1,180) num
+) insert into tickets(slot, num) (select days.day, ticket_numbers.num from days cross join ticket_numbers);
+delete from tickets where (slot::time<'18:30') and slot::date in('2019-12-07','2019-12-14','2019-12-21','2019-12-28');
+update tickets set event_code = 'staff' where slot::date='2019-12-01';
+
+
+-- chcclights
+with days as (
+select day from generate_series(
+  '2019-11-24 18:00:00'::timestamptz,
+  '2019-12-22  21:30:00'::timestamptz,
+  '30 minutes'::interval
+) ms(day) where (day::time>='18:00'::time and day::time<='21:30' and day::date not in ('2019-11-27','2019-11-30','2019-12-04','2019-12-07','2019-12-12','2019-12-13','2019-12-19','2019-12-20','2019-12-23','2019-12-24'))
+), ticket_numbers as (
+  select num from generate_series(1,250) num
 ) insert into tickets(slot, num) (select days.day, ticket_numbers.num from days cross join ticket_numbers);
 
-alter table tickets add column event_code citext;
-create index tickets_event_code_key on tickets(event_code);
-update tickets set event_code = 'staff' where slot::date='2017-11-26';
-update tickets set event_code = 'mcc' where slot='2017-12-03 18:30:00' and num in(select subq.num from tickets subq where subq.slot='2017-12-03 18:30:00' and subq.guest_id is null order by num limit 100);
-
-
-
+delete from tickets where (slot::time<'18:30' or slot::time>'20:00') and (slot::date < '2019-12-06' or slot::date in('2019-12-08','2019-12-09','2019-12-10'));
+delete from tickets where (slot::time<'19:00' or slot::time>'20:30') and slot::date in('2019-12-11','2019-12-18');
+delete from tickets where (slot::time<'20:00' or slot::time>'21:30') and slot::date in('2019-12-14','2019-12-21');
+delete from tickets where (slot::time<'18:30' or slot::time>'21:00') and slot::date in('2019-12-15');
+delete from tickets where (slot::time<'18:00' or slot::time>'21:00') and slot::date in('2019-12-16','2019-12-17','2019-12-22');

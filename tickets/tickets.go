@@ -2,13 +2,17 @@ package tickets
 
 import (
 	"database/sql"
+	"encoding/csv"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/blit/advlight/config"
 
 	"github.com/lib/pq"
 )
@@ -25,9 +29,8 @@ func init() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	if strings.EqualFold(os.Getenv("ADVLIGHT_ENV"), "production") {
-		HostName = "https://bcatickets.blit.com"
-	} else {
+	HostName = strings.TrimSpace(config.HostName)
+	if HostName == "" {
 		HostName = "http://localhost:8080"
 	}
 }
@@ -471,6 +474,34 @@ func (r *repo) GetSlotDates() ([]time.Time, error) {
 		getSlotDatesCache = append(getSlotDatesCache, dt)
 	}
 	return getSlotDatesCache, nil
+}
+
+// ToCSV writes the database to csv
+func (r *repo) ToCSV(w io.Writer) error {
+	log.Println("Repo ToCSV")
+	rows, err := r.db.Query(`select g.email,g.created_at,t.updated_at,g.verified,coalesce(g.ip_address,'0.0.0.0'),t.slot,coalesce(t.event_code,'') from guests g join tickets t on g.id=t.guest_id;`)
+	if err != nil {
+		return err
+	}
+	rec := []string{"email", "created", "updated", "verified", "ip_address", "slot", "event_code"}
+	wc := csv.NewWriter(w)
+	wc.Write(rec) // write the headers, rec will be reused for rows
+
+	defer rows.Close()
+	defer wc.Flush()
+	for rows.Next() {
+		for i := 0; i < 7; i++ {
+			err := rows.Scan(&rec[0], &rec[1], &rec[2], &rec[3], &rec[4], &rec[5], &rec[6])
+			if err != nil {
+				err = fmt.Errorf("error scanning col %d: %s", i, err.Error())
+				log.Println(err)
+				wc.Write([]string{err.Error()})
+				return err
+			}
+		}
+		wc.Write(rec)
+	}
+	return nil
 }
 
 func (r *repo) ClearCache() {

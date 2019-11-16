@@ -1,7 +1,11 @@
 {{ define "content" }}
 <div style="max-width:400px; margin:20px auto; height:100px;">
     <div style="text-align: center;">
-        <h3 style="color:#0f1515;">Christmas Lights Drive-Thru</h3>
+        {{ if eventBanner }}
+        <img src="{{eventBanner}}" style="width:100%;margin-top:-21px;margin-bottom:15px">
+        {{ else }}
+        <h3 style="color:#0f1515;">{{eventName}}</h3>
+        {{ end }}        
         {{ with .ErrorMsg}}<div class="alert alert-danger" role="alert">{{.}}</div>{{end}}
         {{ with .SuccessMsg}}<div class="alert alert-success" role="alert">{{.}}</div>{{end}}
         {{ if .SentEmailConfirm }}
@@ -91,15 +95,20 @@
             {{ else }}
                 <button type="submit" class="g-recaptcha btn btn-danger btn-lg" style="width:100%" data-sitekey="6Lc6LjwUAAAAAIyx69oeyja-Lf1vXmL1z-W_CeO8" data-callback='onNonValidtedSubmit'>Reserve <strong id="slotName"></strong></button>
                 <small id="passwordHelpBlock" class="form-text text-muted">
-                Clicking reserve will send an email to confirm your reservation.  You must click the confirmation email 
-                sent to your email to confirm your ticket, unconfirmed reservations may expire depending on demand.
+                Clicking reserve will send an email to confirm your reservation.  
+                <strong>You must click the confirmation email</strong>
+                sent to your email to confirm your ticket, unconfirmed reservations may expire depending on demand. 
+                <strong>One ticket per vehicle, one ticket per email/day</strong>.  Multiple tickets per day require the use 
+                of different email address.
                 </small>                        
             {{ end }}            
         </form>
 
-        <div id="donate_footer2">
-          <a style="width:100%" href="https://granitebay.baysideonline.com/christmas-drive-thru-giving/" class="btn btn-primary">Donate</a>
-        </div>
+        {{ if .DonateLink }}
+            <div id="donate_footer2">
+            <a style="width:100%" href="{{.DonateLink}}" class="btn btn-primary">Donate</a>
+            </div>
+        {{ end }}
                 
         
         

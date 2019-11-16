@@ -9,6 +9,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/blit/advlight/config"
+
 	"github.com/blit/advlight/tickets"
 
 	"github.com/blit/advlight/views/assets"
@@ -51,6 +53,24 @@ func LoadTemplates() error {
 		template.FuncMap{
 			"gaID": func() string {
 				return GAID
+			},
+			"eventName": func() string {
+				return config.EventName
+			},
+			"eventLink": func() string {
+				return config.EventLink
+			},
+			"eventBanner": func() string {
+				return config.EventBanner
+			},
+			"eventLogo": func() string {
+				return config.EventLogo
+			},
+			"eventAddress": func() string {
+				return config.EventAddress
+			},
+			"favICO": func() string {
+				return config.FavICO
 			},
 			"CAPTCHADisabled": func() string {
 				if tickets.CAPTCHADisabled {

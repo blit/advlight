@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/blit/advlight/config"
 	"github.com/blit/advlight/tickets"
 )
 
@@ -22,16 +23,23 @@ func TicketAdminHandler(w http.ResponseWriter, r *http.Request) {
 		Password       string
 		AddTickets     string
 	}{
-		"",  // ErrorMsg
-		nil, // Stats
-		0,   // TotalTickets
-		0,   // TotalBooked
-		9,   // TotalAvailable
+		"",                             // ErrorMsg
+		nil,                            // Stats
+		0,                              // TotalTickets
+		0,                              // TotalBooked
+		9,                              // TotalAvailable
 		os.Getenv("ADVLIGHT_PASSWORD"), // Password
-		"", // AddTickets
+		"",                             // AddTickets
 	}
 
 	if r.Method == "POST" {
+
+		if r.FormValue("download") == "true" && r.FormValue("password") == data.Password {
+			w.Header().Set("Content-Disposition", "attachment; filename=guests.csv")
+			w.Header().Set("Content-Type", "text/csv")
+			tickets.Repo.ToCSV(w)
+			return
+		}
 
 		if r.FormValue("addTickets") != "" && r.FormValue("password") == data.Password {
 			var addSlot, addCount int
@@ -90,7 +98,7 @@ func TicketAdminExpiresHandler(w http.ResponseWriter, r *http.Request) {
 	for _, g := range guests {
 		slot := g.Tickets[0]
 		em := tickets.ExpirationEmail(*g, slot.Slot)
-		subject := fmt.Sprintf("Your Bayside Christmas Drive-Thru ticket request expired (%s)", slot.Slot.Format("Jan 02, 3:04pm"))
+		subject := fmt.Sprintf("Your %s ticket request expired (%s)", config.EventName, slot.Slot.Format("Jan 02, 3:04pm"))
 		err = tickets.Mailer.Send(g.Email, subject, em)
 		if err != nil {
 			w.Write([]byte(fmt.Sprintf("ERROR %s %s", g.Email, err.Error())))

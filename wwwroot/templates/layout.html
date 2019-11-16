@@ -12,13 +12,8 @@
 	</script>
 	
 	<!-- Favicons -->
-	<link rel="icon" sizes="16x16 32x32" href="https://s3-us-west-1.amazonaws.com/baysideonline4.0/assets/favicon.png">
-	<!--[if IE]><link rel="shortcut icon" href="https://s3-us-west-1.amazonaws.com/baysideonline4.0/assets/favicon.ico"><![endif]-->
-	<!--[if lt IE 9]><link href='https://s3-us-west-1.amazonaws.com/baysideonline4.0/wp-content/themes/bones/bootstrap/css/ie8-1.css' type='text/css'/><![endif]-->
-	<!--[if lt IE 9]><link href='https://s3-us-west-1.amazonaws.com/baysideonline4.0/wp-content/themes/bones/bootstrap/css/ie8-2.css' type='text/css'/><![endif]-->		 
-	<link rel="apple-touch-icon-precomposed" href="https://s3-us-west-1.amazonaws.com/baysideonline4.0/assets/152x152.png">
+	<link rel="icon" sizes="16x16 32x32" href="{{favICO}}">
 	<meta name="msapplication-TileColor" content="#2aace3">
-	<meta name="msapplication-TileImage" content="https://s3-us-west-1.amazonaws.com/baysideonline4.0/assets/144x144.png"> 
 	<meta name="viewport" content="width=device-width, minimal-ui">
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -26,12 +21,7 @@
 	<meta name="MobileOptimized" content="320">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-	<!--
-	<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>	
-	-->
-	<title>Bayside Christmas Lights Drive-Thru</title>
+	<title>{{ eventName }}</title>
 	{{ block "head" . }}{{ end }}
 	{{if eq CAPTCHADisabled "false" }}
 		<script src="https://www.google.com/recaptcha/api.js" async defer></script>
@@ -46,8 +36,8 @@
 
 <body>
 	<div style="text-align:center; background-color:#0f1515; padding:10px 10px; height:55px;">
-		<a href="https://www.baysideonline.com">
-			<img class="logo" style="height:40px" src="https://www.baysideonline.com/wp-content/uploads/2017/11/1510763011-24260621-144x59x144x102x0x23-bayside-only-gold.png"></a>	
+		<a href="{{ eventLink }}">
+			<img class="logo" style="height:40px" src="{{ eventLogo }}"></a>	
 	</div>
     <div id="content">
       {{ block "content" . }}{{ end }}
